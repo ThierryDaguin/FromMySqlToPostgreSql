@@ -430,17 +430,16 @@ class FromMySqlToPostgreSql
      */
     private function sanitizeValue($strValue)
     {
-        // Date 0000-00-00 00:00:00 => 1970-01-01 00:00:00
-        if($strValue === '0000-00-00 00:00:00') {
-            return '1970-01-01 00:00:00';
+        switch ($strValue) {
+            case '0000-00-00 00:00:00':
+                return '1970-01-01 00:00:00';
+                
+            case '0000-00-00':
+                return '1970-01-01';
+                
+            default:
+                return $strValue;
         }
-
-        // Date 0000-00-00 => 1970-01-01
-        if($strValue === '0000-00-00') {
-            return '1970-01-01';
-        }
-
-        return $strValue;
     }
     
     /**
@@ -622,8 +621,6 @@ class FromMySqlToPostgreSql
             
             fclose($resourceCsv);
             unset($resourceCsv);
-
-            $this->log("\t" . '-- Trying to populate table: ' . $this->strSchema . '.' . $strTableName . ' with one sql request (COPY) ...' . PHP_EOL);
             
             $sql  = "COPY " . $this->strSchema . ".\"" . $strTableName . "\" FROM '" . $strAddrCsv . "' DELIMITER ',' CSV;";
             $stmt = $this->pgsql->query($sql);
@@ -640,7 +637,6 @@ class FromMySqlToPostgreSql
                  * In most cases (~100%) the control will not get here.
                  * Perform given table population using prepared statment.
                  */
-                $this->log("\t".'-- Failed -> trying to populate table with multiple requests ...' . PHP_EOL);
                 $intRetVal = $this->populateTableByPrepStmt($arrRows, $strTableName, 0, $intRowsCnt, 0);
             }
             
