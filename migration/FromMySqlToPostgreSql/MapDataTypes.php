@@ -43,7 +43,7 @@ class MapDataTypes
      */
     private static $arrMySqlPgSqlTypesMap = [
         'bit' => [
-            'increased_size'           => 'smallint', 
+            'increased_size'           => 'bit varying', 
             'type'                     => 'bit',
             'mySqlVarLenPgSqlFixedLen' => false,
         ],
@@ -79,7 +79,7 @@ class MapDataTypes
         ],
         
         'bigint' => [
-            'increased_size'           => '', 
+            'increased_size'           => 'numeric',
             'type'                     => 'bigint',
             'mySqlVarLenPgSqlFixedLen' => true,
         ],
@@ -91,20 +91,20 @@ class MapDataTypes
         ],
         
         'double' => [
-            'increased_size'           => '', 
+            'increased_size'           => 'double precision', 
             'type'                     => 'double precision',
             'mySqlVarLenPgSqlFixedLen' => true,
         ],
         
         'double precision' => [
-            'increased_size'           => '', 
+            'increased_size'           => 'double precision', 
             'type'                     => 'double precision',
             'mySqlVarLenPgSqlFixedLen' => true,
         ],
         
         'numeric' => [
             'increased_size'           => '', 
-            'type'                     => 'decimal',
+            'type'                     => 'numeric',
             'mySqlVarLenPgSqlFixedLen' => false,
         ],
         
@@ -115,14 +115,14 @@ class MapDataTypes
         ],
         
         'decimal(19,2)' => [
-            'increased_size'           => 'double precision', 
+            'increased_size'           => 'numeric', 
             'type'                     => 'money',
             'mySqlVarLenPgSqlFixedLen' => false,
         ],
         
         'char' => [
             'increased_size'           => '', 
-            'type'                     => 'char',
+            'type'                     => 'character',
             'mySqlVarLenPgSqlFixedLen' => false,
         ],
         
@@ -156,30 +156,6 @@ class MapDataTypes
             'mySqlVarLenPgSqlFixedLen' => false,
         ],
         
-        'varbinary' => [
-            'increased_size'           => '', 
-            'type'                     => 'bytea',
-            'mySqlVarLenPgSqlFixedLen' => true,
-        ],
-        
-        'binary' => [
-            'increased_size'           => '', 
-            'type'                     => 'bytea',
-            'mySqlVarLenPgSqlFixedLen' => false,
-        ],
-        
-        'longtext' => [
-            'increased_size'           => '', 
-            'type'                     => 'text',
-            'mySqlVarLenPgSqlFixedLen' => true,
-        ],
-        
-        'text' => [
-            'increased_size'           => '', 
-            'type'                     => 'text',
-            'mySqlVarLenPgSqlFixedLen' => true,
-        ],
-        
         'point' => [
             'increased_size'           => '', 
             'type'                     => 'point',
@@ -207,13 +183,61 @@ class MapDataTypes
         'tinytext' => [
             'increased_size'           => '', 
             'type'                     => 'text',
-            'mySqlVarLenPgSqlFixedLen' => true,
+            'mySqlVarLenPgSqlFixedLen' => false,
         ],
         
         'mediumtext' => [
             'increased_size'           => '', 
             'type'                     => 'text',
+            'mySqlVarLenPgSqlFixedLen' => false,
+        ],
+        
+        'longtext' => [
+            'increased_size'           => '', 
+            'type'                     => 'text',
+            'mySqlVarLenPgSqlFixedLen' => false,
+        ],
+        
+        'text' => [
+            'increased_size'           => '', 
+            'type'                     => 'text',
+            'mySqlVarLenPgSqlFixedLen' => false,
+        ],
+        
+        'varbinary' => [
+            'increased_size'           => '', 
+            'type'                     => 'bytea',
             'mySqlVarLenPgSqlFixedLen' => true,
+        ],
+        
+        'binary' => [
+            'increased_size'           => '', 
+            'type'                     => 'bytea',
+            'mySqlVarLenPgSqlFixedLen' => true,
+        ],
+        
+        'tinyblob' => [
+            'increased_size'           => '', 
+            'type'                     => 'bytea',
+            'mySqlVarLenPgSqlFixedLen' => false,
+        ],
+        
+        'mediumblob' => [
+            'increased_size'           => '', 
+            'type'                     => 'bytea',
+            'mySqlVarLenPgSqlFixedLen' => false,
+        ],
+        
+        'longblob' => [
+            'increased_size'           => '', 
+            'type'                     => 'bytea',
+            'mySqlVarLenPgSqlFixedLen' => false,
+        ],
+        
+        'blob' => [
+            'increased_size'           => '', 
+            'type'                     => 'bytea',
+            'mySqlVarLenPgSqlFixedLen' => false,
         ],
     ];
     
@@ -265,6 +289,17 @@ class MapDataTypes
                 $strRetVal = $boolIncreaseOriginalSize 
                            ? self::$arrMySqlPgSqlTypesMap[$strDataType]['increased_size'] . '(' . $arrDataType[1]
                            : self::$arrMySqlPgSqlTypesMap[$strDataType]['type'] . '(' . $arrDataType[1];
+            }
+            
+            // Prevent incompatible length (CHARACTER(0) or CHARACTER VARYING(0)).
+            switch ($strRetVal) {
+                case 'character(0)':
+                    $strRetVal = 'character(1)';
+                    break;
+                
+                case 'character varying(0)':
+                    $strRetVal = 'character varying(1)';
+                    break;
             }
         }
         

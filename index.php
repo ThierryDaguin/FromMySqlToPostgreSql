@@ -89,11 +89,15 @@ if (empty($arrConfig)) {
     echo PHP_EOL, '-- Cannot perform a migration due to missing "config[.xml | .json]" file.', PHP_EOL;
 } else {
     spl_autoload_register(function($class) {
-        require 'migration/FromMySqlToPostgreSql/' . $class . '.php';
+        require_once 'migration/FromMySqlToPostgreSql/' . $class . '.php';
     });
+    
+    $arrConfig['temp_dir_path'] = __DIR__ . '/temporary_directory';
+    $arrConfig['logs_dir_path'] = __DIR__ . '/logs_directory';
     
     $migration = new \FromMySqlToPostgreSql($arrConfig);
     $migration->migrate();
 }
 
 exit;
+
